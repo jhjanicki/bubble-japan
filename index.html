@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+<link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Roboto+Slab">
+<style>
+ @import url(http://fonts.googleapis.com/css?family=Dosis);
+
+circle {
+  fill: #FFBE73;
+  stroke: white;
+  opacity: 0.8;
+}
+body{
+	background:#FFF6E5;
+}
+svg{
+	width: 70%;
+	margin-left: 15%;
+	margin-right: 15%;
+	margin-top: 20px;
+	margin-bottom: 10px;
+}
+h3{
+	font-family: 'Dosis', sans-serif;
+	text-align: center;
+}
+.d3-tip {
+        line-height: 1;
+        font-weight: bold;
+        padding: 12px;
+        background: rgba(0, 0, 0, 0.8);
+        color: #fff;
+        border-radius: 2px;
+        font-family: 'Dosis', sans-serif;
+        text-align: center;
+      }
+   .datapoint:hover{
+		fill: white;
+      }
+
+</style>
+<body>
+<h3> Bubble Japan </h3>
+<script src="http://d3js.org/d3.v3.min.js"></script>
+<script src="http://d3js.org/topojson.v1.min.js"></script>
+<script src="http://labratrevenge.com/d3-tip/javascripts/d3.tip.v0.6.3.js"></script>
+<script>
+
+var width = 600,
+    height = 600;
+
+var projection = d3.geo.mercator()
+	.center([114, 24])
+    .scale(1000)
+    .translate([width /20, height ])
+    .precision(.1);
+
+var path = d3.geo.path().projection(projection);
+
+
+var svg = d3.select("body").append("svg")
+    .attr("width", width)
+    .attr("height", height)
+    .style("background","#7ECEFD");
+    
+var tip = d3.tip()
+	.attr('class', 'd3-tip')
+	.offset([-50, 0])
+	.html(function(d) {
+	    return "Prefecture: <strong>" + d.properties.name;
+	});
+ svg.call(tip);
+
+d3.json("jp.topojson", function(error, jp) {
+	console.log("inside json");
+	svg.selectAll("circle")
+      .data(topojson.feature(jp, jp.objects.states).features)
+      .enter().append("circle")
+      .attr('class', 'datapoint')
+      .attr("transform", function(d) { return "translate(" + path.centroid(d) + ")"; })
+      .attr("r", function(d) { return Math.sqrt(path.area(d) / Math.PI); })
+      .on('mouseover', tip.show)
+	  .on('mouseout', tip.hide);
+});
+
+</script>
